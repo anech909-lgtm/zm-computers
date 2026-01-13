@@ -1,11 +1,17 @@
-
 import { GoogleGenAI } from "@google/genai";
 
-// Initialize the Google GenAI client using the process.env.API_KEY directly as required.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Standard initialization. 
+// Note: Vite will replace process.env.API_KEY with the value from your Vercel Environment Variables.
+const apiKey = process.env.API_KEY || "";
 
 export const getTechAdvice = async (prompt: string) => {
+  if (!apiKey || apiKey === "undefined") {
+    console.warn("Gemini API Key is missing. Please set it in your environment variables.");
+    return "I am currently in maintenance mode. Please contact our support team for immediate wholesale assistance.";
+  }
+
   try {
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
