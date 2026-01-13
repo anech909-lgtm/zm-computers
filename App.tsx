@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [notification, setNotification] = useState<{message: string, visible: boolean}>({message: '', visible: false});
 
@@ -36,7 +37,7 @@ const App: React.FC = () => {
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, [view, selectedProductId, selectedSpecs]);
+  }, [view, selectedProductId, selectedSpecs, searchQuery]);
 
   const showNotification = (message: string) => {
     setNotification({ message, visible: true });
@@ -85,6 +86,13 @@ const App: React.FC = () => {
     );
   };
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim() !== '' && view === 'home') {
+      setView('categories');
+    }
+  };
+
   const updateQuantity = (id: string, delta: number) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
@@ -109,11 +117,14 @@ const App: React.FC = () => {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    if (selectedSpecs.length === 0) return PRODUCTS;
-    return PRODUCTS.filter(p => 
-      selectedSpecs.every(spec => p.specs.includes(spec))
-    );
-  }, [selectedSpecs]);
+    return PRODUCTS.filter(p => {
+      const matchesSpecs = selectedSpecs.length === 0 || selectedSpecs.every(spec => p.specs.includes(spec));
+      const matchesSearch = searchQuery === '' || 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        p.category.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSpecs && matchesSearch;
+    });
+  }, [selectedSpecs, searchQuery]);
 
   const renderContent = () => {
     switch(view) {
@@ -163,19 +174,23 @@ const App: React.FC = () => {
             <div className="absolute top-0 left-0 w-full h-screen bg-[conic-gradient(from_0deg_at_50%_50%,rgba(220,38,38,0.02)_0%,transparent_100%)] animate-slow-spin pointer-events-none" />
             <div className="max-w-7xl mx-auto relative z-10">
               <div className="mb-20 reveal">
-                <span className="text-red-500 font-bold uppercase tracking-[0.3em] text-[10px] mb-4 block">Archive</span>
-                <h1 className="text-5xl md:text-8xl font-serif text-white mb-8">Hardware <span className="italic">Segments</span></h1>
+                <span className="text-red-500 font-bold uppercase tracking-[0.3em] text-[10px] mb-4 block">
+                  {searchQuery ? `Searching: ${searchQuery}` : 'Archive'}
+                </span>
+                <h1 className="text-5xl md:text-8xl font-serif text-white mb-8">
+                  {searchQuery ? 'Search' : 'Hardware'} <span className="italic">{searchQuery ? 'Results' : 'Segments'}</span>
+                </h1>
                 
                 <div className="mt-12 space-y-6">
                   <div className="flex items-center space-x-4">
                     <span className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Technical Filters</span>
                     <div className="flex-1 h-[1px] bg-white/5" />
-                    {selectedSpecs.length > 0 && (
+                    {(selectedSpecs.length > 0 || searchQuery !== '') && (
                       <button 
-                        onClick={() => setSelectedSpecs([])}
+                        onClick={() => { setSelectedSpecs([]); setSearchQuery(''); }}
                         className="text-red-500 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors"
                       >
-                        Clear All ({selectedSpecs.length})
+                        Clear All Filters
                       </button>
                     )}
                   </div>
@@ -200,8 +215,15 @@ const App: React.FC = () => {
               <div className="space-y-32">
                 {categories.length === 0 ? (
                    <div className="py-32 text-center glass rounded-3xl border border-white/5 reveal">
-                      <p className="text-gray-500 text-xl mb-4 font-serif italic">No hardware matches these parameters.</p>
-                      <button onClick={() => setSelectedSpecs([])} className="text-red-500 font-bold uppercase tracking-widest text-[10px]">Reset Infrastructure Filters</button>
+                      <p className="text-gray-500 text-xl mb-4 font-serif italic">
+                        No hardware matches "{searchQuery || 'these parameters'}".
+                      </p>
+                      <button 
+                        onClick={() => { setSelectedSpecs([]); setSearchQuery(''); }} 
+                        className="text-red-500 font-bold uppercase tracking-widest text-[10px]"
+                      >
+                        Reset Infrastructure Search
+                      </button>
                    </div>
                 ) : (
                   categories.map((cat, catIdx) => (
@@ -412,6 +434,8 @@ const App: React.FC = () => {
         cartCount={cart.reduce((a, b) => a + b.quantity, 0)} 
         wishlistCount={wishlist.length}
         toggleCart={() => setIsCartOpen(!isCartOpen)} 
+        searchQuery={searchQuery}
+        onSearch={handleSearch}
       />
       {renderContent()}
       <Footer onNavigate={setView} />
