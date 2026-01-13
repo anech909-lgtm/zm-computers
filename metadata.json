@@ -1,0 +1,7 @@
+{
+  "name": "ZM Computers - Premium Tech Wholesale",
+  "description": "A high-end, immersive wholesale platform for laptops and computer hardware, featuring smooth animations, world-class design, and an AI-powered tech advisor.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
