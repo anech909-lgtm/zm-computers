@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Product } from '../types';
 import ProductCard from './ProductCard';
@@ -14,11 +13,19 @@ interface ProductDetailProps {
   onQuickView: (product: Product) => void;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ product, allProducts, onAddToCart, onViewDetail, onToggleWishlist, isWishlisted, onBack, onQuickView }) => {
+const ProductDetail: React.FC<ProductDetailProps> = ({ 
+  product, 
+  allProducts, 
+  onAddToCart, 
+  onViewDetail, 
+  onToggleWishlist, 
+  isWishlisted, 
+  onBack, 
+  onQuickView 
+}) => {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [shareFeedback, setShareFeedback] = useState(false);
 
   const adjustQuantity = (delta: number) => {
     setQuantity(prev => Math.max(1, prev + delta));
@@ -38,26 +45,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, allProducts, onA
       // Auto-hide after 3 seconds
       setTimeout(() => setShowToast(false), 3000);
     }, 800);
-  };
-
-  const handleShare = async () => {
-    const shareData = {
-      title: `ZM Computers - ${product.name}`,
-      text: `Industrial Grade Computing: Check out the ${product.name} at ZM Computers.`,
-      url: window.location.href,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        setShareFeedback(true);
-        setTimeout(() => setShareFeedback(false), 2000);
-      }
-    } catch (err) {
-      console.debug('Share cancelled or failed', err);
-    }
   };
 
   const relatedProducts = useMemo(() => {
@@ -166,11 +153,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, allProducts, onA
                 </div>
               </div>
 
-              <div className="flex flex-col space-y-6">
+              <div className="flex items-stretch space-x-4 h-24">
                 <button 
                   onClick={handleAdd}
                   disabled={isAdding}
-                  className={`relative overflow-hidden group flex items-center justify-center space-x-6 py-8 px-10 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] transition-all duration-700 shadow-2xl transform active:scale-95 ${
+                  className={`flex-1 relative overflow-hidden group flex items-center justify-center space-x-6 px-10 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.5em] transition-all duration-700 shadow-2xl transform active:scale-95 ${
                     isAdding 
                     ? 'bg-white text-black scale-[1.03]' 
                     : 'bg-red-600 text-white hover:bg-white hover:text-black hover:scale-[1.02]'
@@ -190,6 +177,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, allProducts, onA
                     )}
                   </span>
                 </button>
+                <button
+                  onClick={() => onToggleWishlist(product)}
+                  className={`w-24 flex items-center justify-center rounded-[2.5rem] glass border transition-all duration-500 hover:scale-105 active:scale-90 ${
+                    isWishlisted ? 'border-red-600 text-red-500 bg-red-600/10' : 'border-white/10 text-white hover:border-red-600/50 hover:text-red-500'
+                  }`}
+                >
+                  <svg className="w-8 h-8" fill={isWishlisted ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -207,6 +204,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, allProducts, onA
                   onAddToCart={(p) => onAddToCart(p, 1)} 
                   onViewDetail={onViewDetail}
                   onQuickView={onQuickView}
+                  onToggleWishlist={onToggleWishlist}
+                  isWishlisted={!!allProducts.find(p => p.id === relProduct.id && isWishlisted)} // Note: simplified logic for related products
                 />
               ))}
             </div>

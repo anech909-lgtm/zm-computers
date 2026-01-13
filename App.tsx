@@ -54,7 +54,6 @@ const App: React.FC = () => {
       return [...prev, { ...product, quantity }];
     });
     
-    // Instead of forcing the drawer open, show a sophisticated toast
     showNotification(`${quantity}x ${product.name} added to infrastructure order.`);
   };
 
@@ -124,7 +123,7 @@ const App: React.FC = () => {
             <Hero onExplore={() => setView('categories')} />
             <section id="collections" className="py-32 px-6 md:px-12 bg-black relative">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(220,38,38,0.05)_0%,transparent_50%)] pointer-events-none" />
-              <div className="max-w-7xl mx-auto">
+              <div className="max-w-7xl auto px-4 mx-auto">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-20">
                   <div className="reveal opacity-0 translate-y-10 scale-95 transition-all duration-1000">
                     <span className="text-red-500 font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Selection</span>
@@ -140,7 +139,14 @@ const App: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                   {PRODUCTS.slice(0, 4).map((product, idx) => (
                     <div key={product.id} className="reveal opacity-0 translate-y-10 scale-95 transition-all duration-1000" style={{ transitionDelay: `${idx * 150}ms` }}>
-                      <ProductCard product={product} onAddToCart={handleAddToCart} onViewDetail={handleViewDetail} onQuickView={handleQuickView} />
+                      <ProductCard 
+                        product={product} 
+                        onAddToCart={handleAddToCart} 
+                        onViewDetail={handleViewDetail} 
+                        onQuickView={handleQuickView}
+                        onToggleWishlist={handleToggleWishlist}
+                        isWishlisted={!!wishlist.find(p => p.id === product.id)}
+                      />
                     </div>
                   ))}
                 </div>
@@ -209,7 +215,15 @@ const App: React.FC = () => {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                         {filteredProducts.filter(p => p.category === cat).map((p) => (
-                          <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} onViewDetail={handleViewDetail} onQuickView={handleQuickView} />
+                          <ProductCard 
+                            key={p.id} 
+                            product={p} 
+                            onAddToCart={handleAddToCart} 
+                            onViewDetail={handleViewDetail} 
+                            onQuickView={handleQuickView}
+                            onToggleWishlist={handleToggleWishlist}
+                            isWishlisted={!!wishlist.find(item => item.id === p.id)}
+                          />
                         ))}
                       </div>
                     </div>
@@ -236,7 +250,14 @@ const App: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                     {wishlist.map((product, idx) => (
                       <div key={product.id} className="reveal opacity-0 translate-y-10 scale-95 transition-all duration-1000" style={{ transitionDelay: `${idx * 100}ms` }}>
-                        <ProductCard product={product} onAddToCart={handleAddToCart} onViewDetail={handleViewDetail} onQuickView={handleQuickView} />
+                        <ProductCard 
+                          product={product} 
+                          onAddToCart={handleAddToCart} 
+                          onViewDetail={handleViewDetail} 
+                          onQuickView={handleQuickView}
+                          onToggleWishlist={handleToggleWishlist}
+                          isWishlisted={true}
+                        />
                       </div>
                     ))}
                   </div>
@@ -258,7 +279,14 @@ const App: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                 {PRODUCTS.filter(p => p.isBestSeller || p.isSale).map((product, idx) => (
                   <div key={product.id} className="reveal opacity-0 translate-y-10 scale-95 transition-all duration-1000" style={{ transitionDelay: `${idx * 100}ms` }}>
-                    <ProductCard product={product} onAddToCart={handleAddToCart} onViewDetail={handleViewDetail} onQuickView={handleQuickView} />
+                    <ProductCard 
+                      product={product} 
+                      onAddToCart={handleAddToCart} 
+                      onViewDetail={handleViewDetail} 
+                      onQuickView={handleQuickView}
+                      onToggleWishlist={handleToggleWishlist}
+                      isWishlisted={!!wishlist.find(p => p.id === product.id)}
+                    />
                   </div>
                 ))}
               </div>
@@ -402,6 +430,8 @@ const App: React.FC = () => {
         product={quickViewProduct} 
         onClose={() => setQuickViewProduct(null)} 
         onAddToCart={handleAddToCart}
+        onToggleWishlist={handleToggleWishlist}
+        isWishlisted={!!quickViewProduct && !!wishlist.find(p => p.id === quickViewProduct.id)}
       />
 
       {/* Global Toast Notification */}

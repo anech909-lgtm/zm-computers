@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Product } from '../types';
 
@@ -6,9 +5,17 @@ interface QuickViewModalProps {
   product: Product | null;
   onClose: () => void;
   onAddToCart: (product: Product, quantity: number) => void;
+  onToggleWishlist: (product: Product) => void;
+  isWishlisted: boolean;
 }
 
-const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAddToCart }) => {
+const QuickViewModal: React.FC<QuickViewModalProps> = ({ 
+  product, 
+  onClose, 
+  onAddToCart,
+  onToggleWishlist,
+  isWishlisted
+}) => {
   if (!product) return null;
 
   const [quantity, setQuantity] = useState(1);
@@ -53,6 +60,20 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAdd
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
             
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleWishlist(product);
+              }}
+              className={`absolute top-6 right-6 md:top-10 md:right-10 z-30 p-4 rounded-full glass border border-white/10 transition-all duration-300 transform hover:scale-110 active:scale-95 ${
+                isWishlisted ? 'text-red-500 bg-red-600/20 border-red-600/40' : 'text-white hover:text-red-500'
+              }`}
+            >
+              <svg className="w-6 h-6" fill={isWishlisted ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+
             {product.isSale && (
               <div className="absolute top-6 left-6 md:top-10 md:left-10 bg-red-600 text-white font-black px-4 md:px-6 py-1.5 md:py-2 rounded-full uppercase tracking-[0.2em] text-[8px] md:text-[9px] animate-pulse">
                 Wholesale Special
